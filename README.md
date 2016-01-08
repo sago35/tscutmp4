@@ -1,0 +1,2 @@
+# tscutmp4
+tsファイルをaviutlでカットしてx264に変換する
