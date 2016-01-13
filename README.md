@@ -16,3 +16,8 @@ tsファイルをaviutlでカットしてx264に変換する
 1. input.ts.avsをx264.exeでencodeする
 2. mp4boxで組み立てる
 ```
+
+## 新しくつくりたい部分
+
+- aviutlで開直前までの処理を行い、キューイングする
+- encode + mp4box の部分を指定時間から実行する
