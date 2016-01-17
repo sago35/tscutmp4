@@ -5,6 +5,7 @@ import (
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
 	"log"
+	"os"
 )
 
 type MyMainWindow struct {
@@ -25,7 +26,13 @@ type EnvModel struct {
 	items []EnvItem
 }
 
+const tmp string = `tmp`
+
 func main() {
+	if _, err := os.Stat(tmp); err != nil {
+		os.Mkdir(tmp, 0666)
+	}
+
 	mw := &MyMainWindow{model: NewEnvModel()}
 
 	if _, err := (MainWindow{
