@@ -69,5 +69,5 @@ func (m *EnvModel) ItemCount() int {
 }
 
 func (m *EnvModel) Value(index int) interface{} {
-	return m.items[index].name
+	return fmt.Sprintf("%d : %03d : %s", m.items[index].status, m.items[index].index, m.items[index].name)
 }
