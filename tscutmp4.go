@@ -14,8 +14,10 @@ type MyMainWindow struct {
 }
 
 type EnvItem struct {
-	name  string
-	value string
+	name   string
+	value  string
+	index  int
+	status int
 }
 
 type EnvModel struct {
@@ -36,7 +38,7 @@ func main() {
 			fmt.Println("-- dropped --")
 			for _, f := range files {
 				fmt.Println(f)
-				mw.model.items = append(mw.model.items, EnvItem{name: f})
+				mw.model.items = append(mw.model.items, EnvItem{name: f, index: mw.model.ItemCount() + 1, status: 0})
 			}
 			mw.lb.SetModel(mw.model)
 
