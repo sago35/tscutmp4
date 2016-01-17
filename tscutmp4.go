@@ -50,6 +50,9 @@ func main() {
 					ListBox{
 						AssignTo: &mw.lb,
 						Model:    mw.model,
+						OnItemActivated: func() {
+							walk.MsgBox(mw, "Info", mw.model.items[mw.lb.CurrentIndex()].name, walk.MsgBoxIconInformation)
+						},
 					},
 				},
 			},
