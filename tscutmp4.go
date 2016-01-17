@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
+	"io"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 type MyMainWindow struct {
@@ -35,6 +37,18 @@ func main() {
 
 	mw := &MyMainWindow{model: NewEnvModel()}
 
+	ch := make(chan EnvItem, 100)
+
+	go func() {
+		for item := range ch {
+			dst := fmt.Sprintf("%s/%03d", tmp, item.index)
+			os.Mkdir(dst, 0666)
+			copy(item.name, dst)
+			mw.model.items[item.index - 1].status = 1
+			mw.lb.SetModel(mw.model)
+		}
+	}()
+
 	if _, err := (MainWindow{
 		AssignTo: &mw.MainWindow,
 		Title:    fmt.Sprintf("tscutmp4"),
@@ -45,7 +59,9 @@ func main() {
 			fmt.Println("-- dropped --")
 			for _, f := range files {
 				fmt.Println(f)
-				mw.model.items = append(mw.model.items, EnvItem{name: f, index: mw.model.ItemCount() + 1, status: 0})
+				item := EnvItem{name: f, index: mw.model.ItemCount() + 1, status: 0}
+				mw.model.items = append(mw.model.items, item)
+				ch <- item
 			}
 			mw.lb.SetModel(mw.model)
 
@@ -80,4 +96,28 @@ func (m *EnvModel) ItemCount() int {
 
 func (m *EnvModel) Value(index int) interface{} {
 	return fmt.Sprintf("%d : %03d : %s", m.items[index].status, m.items[index].index, m.items[index].name)
+}
+
+func copy(src, dst string) {
+	s, err := os.Open(src)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer s.Close()
+
+	f, err := os.Stat(dst)
+	if f.IsDir() {
+		dst = fmt.Sprintf("%s/%s", dst, filepath.Base(src))
+	}
+
+	d, err := os.Create(dst)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer d.Close()
+
+	_, err = io.Copy(d, s)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
