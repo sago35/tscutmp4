@@ -106,8 +106,16 @@ func copy(src, dst string) {
 	defer s.Close()
 
 	f, err := os.Stat(dst)
-	if f.IsDir() {
-		dst = fmt.Sprintf("%s/%s", dst, filepath.Base(src))
+	if err != nil {
+		if os.IsNotExist(err) {
+			// 何もしない
+		} else {
+			panic(err)
+		}
+	} else {
+		if f.IsDir() {
+			dst = fmt.Sprintf("%s/%s", dst, filepath.Base(src))
+		}
 	}
 
 	d, err := os.Create(dst)
