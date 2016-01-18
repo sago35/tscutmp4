@@ -43,7 +43,7 @@ func main() {
 		for item := range ch {
 			dst := fmt.Sprintf("%s/%03d", tmp, item.index)
 			os.Mkdir(dst, 0666)
-			copy(item.name, dst)
+			copy(item.name, fmt.Sprintf("%s/%s", dst, `input.ts`))
 			mw.model.items[item.index - 1].status = 1
 			mw.lb.SetModel(mw.model)
 		}
