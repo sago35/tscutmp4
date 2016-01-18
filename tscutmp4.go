@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -17,10 +18,11 @@ type MyMainWindow struct {
 }
 
 type EnvItem struct {
-	name   string
-	value  string
-	index  int
-	status int
+	name    string
+	file    *os.File
+	workdir string
+	index   int
+	status  int
 }
 
 type EnvModel struct {
@@ -35,17 +37,28 @@ func main() {
 		os.Mkdir(tmp, 0666)
 	}
 
+	cwd, err := filepath.Abs(".")
+
 	mw := &MyMainWindow{model: NewEnvModel()}
 
 	ch := make(chan EnvItem, 100)
 
 	go func() {
+		if err != nil {
+			panic(err)
+		}
+
 		for item := range ch {
-			dst_dir := fmt.Sprintf("%s/%03d", tmp, item.index)
-			os.Mkdir(dst_dir, 0666)
-			dst_file := fmt.Sprintf("%s/%s", dst_dir, `input.ts`)
-			copy(item.name, dst_file)
-			mw.model.items[item.index - 1].status = 1
+
+			copy(item.name, fmt.Sprintf("%s/%s", item.workdir, `input.ts`))
+			exec_cmd(item.workdir, []string{cwd + `\extra\dgmpgdec158\DGIndex.exe`, `-hide`, `-IF=[input.ts]`, `-OM=2`, `-OF=[input.ts]`, `-AT=[G:\encode\encode_18_masako\template.avs]`, `-EXIT`})
+			exec_cmd(item.workdir, []string{cwd + `\extra\BonTsDemux\BonTsDemuxC.exe`, `-i`, `input.ts`, `-o`, `input.ts.bontsdemux`, `-encode`, `Demux(wav)`, `-start`, `-quit`})
+			exec_cmd(item.workdir, []string{cwd + `\extra\neroAacEnc.exe`, `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.bontsdemux.wav`, `-of`, `input.ts.bontsdemux.aac`})
+			exec_cmd(item.workdir, []string{cwd + `\extra\avs2wav.exe`, `input.ts.avs`, `input.ts.all.wav`})
+			copy(cwd+`\extra\trim.avs`, item.workdir)
+			copy(cwd+`\extra\aviutl.ini`, item.workdir)
+
+			mw.model.items[item.index-1].status = 1
 			mw.lb.SetModel(mw.model)
 		}
 	}()
@@ -60,7 +73,23 @@ func main() {
 			fmt.Println("-- dropped --")
 			for _, f := range files {
 				fmt.Println(f)
-				item := EnvItem{name: f, index: mw.model.ItemCount() + 1, status: 0}
+				file, err := os.Open(f)
+				if err != nil {
+					panic(err)
+				}
+
+				item := EnvItem{
+					name:    f,
+					file:    file,
+					workdir: fmt.Sprintf("%s/%03d", tmp, mw.model.ItemCount() + 1),
+					index:   mw.model.ItemCount() + 1,
+					status:  0,
+				}
+
+				err = os.Mkdir(abs(item.workdir), 0666)
+				if err != nil {
+					panic(err)
+				}
 				mw.model.items = append(mw.model.items, item)
 				ch <- item
 			}
@@ -75,7 +104,8 @@ func main() {
 						AssignTo: &mw.lb,
 						Model:    mw.model,
 						OnItemActivated: func() {
-							walk.MsgBox(mw, "Info", mw.model.items[mw.lb.CurrentIndex()].name, walk.MsgBoxIconInformation)
+							item := mw.model.items[mw.lb.CurrentIndex()]
+							go exec_cmd(item.workdir, []string{cwd + `\extra\aviutl99i8\aviutl.exe`, `trim.avs`, `-a`, `input.ts.all.wav`})
 						},
 					},
 				},
@@ -96,7 +126,7 @@ func (m *EnvModel) ItemCount() int {
 }
 
 func (m *EnvModel) Value(index int) interface{} {
-	return fmt.Sprintf("%d : %03d : %s", m.items[index].status, m.items[index].index, m.items[index].name)
+	return fmt.Sprintf("%d : %03d : %s", m.items[index].status, m.items[index].index, m.items[index].file.Name())
 }
 
 func copy(src, dst string) {
@@ -129,4 +159,24 @@ func copy(src, dst string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+func exec_cmd(dir string, cmd_and_args []string) error {
+	cmd := exec.Command(cmd_and_args[0], cmd_and_args[1:]...)
+	cmd.Dir = dir
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func abs(path string) string {
+	a, err := filepath.Abs(path)
+	if err != nil {
+		panic(err)
+	}
+	return a
 }
