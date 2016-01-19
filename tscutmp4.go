@@ -38,16 +38,15 @@ func main() {
 	}
 
 	cwd, err := filepath.Abs(".")
+	if err != nil {
+		panic(err)
+	}
 
 	mw := &MyMainWindow{model: NewEnvModel()}
 
 	ch := make(chan EnvItem, 100)
 
 	go func() {
-		if err != nil {
-			panic(err)
-		}
-
 		for item := range ch {
 
 			copy(item.name, fmt.Sprintf("%s/%s", item.workdir, `input.ts`))
