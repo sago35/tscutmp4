@@ -15,6 +15,7 @@ type MyMainWindow struct {
 	*walk.MainWindow
 	model *EnvModel
 	lb    *walk.ListBox
+	te    *walk.TextEdit
 }
 
 type EnvItem struct {
@@ -106,6 +107,16 @@ func main() {
 							item := mw.model.items[mw.lb.CurrentIndex()]
 							go exec_cmd(item.workdir, []string{cwd + `\extra\aviutl99i8\aviutl.exe`, `trim.avs`, `-a`, `input.ts.all.wav`})
 						},
+						OnCurrentIndexChanged: func() {
+							i := mw.lb.CurrentIndex()
+							item := &mw.model.items[i]
+
+							mw.te.SetText(item.file.Name())
+						},
+					},
+					TextEdit{
+						AssignTo: &mw.te,
+						ReadOnly: true,
 					},
 				},
 			},
