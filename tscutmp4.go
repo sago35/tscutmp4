@@ -120,6 +120,19 @@ func main() {
 					},
 				},
 			},
+			Composite{
+				Layout: HBox{MarginsZero: false},
+				Children: []Widget{
+					HSpacer{},
+					PushButton{
+						Text:     "OK",
+					},
+					PushButton{
+						Text:      "Cancel",
+					},
+				},
+			},
+
 		},
 	}.Run()); err != nil {
 		log.Fatal(err)
