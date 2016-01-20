@@ -35,7 +35,9 @@ const tmp string = `tmp`
 
 func main() {
 	if _, err := os.Stat(tmp); err != nil {
-		os.Mkdir(tmp, 0666)
+		if os.IsNotExist(err) {
+			os.Mkdir(tmp, 0666)
+		}
 	}
 
 	cwd, err := filepath.Abs(".")
