@@ -6,10 +6,11 @@ import (
 )
 
 type Row struct {
-	index int
-	path  string
-	file  *os.File
+	index   int
+	path    string
+	file    *os.File
 	workdir string
+	status  int
 }
 
 type RowModel struct {
@@ -31,6 +32,8 @@ func (m *RowModel) Value(row, col int) interface{} {
 		return item.path
 	case 2:
 		return item.workdir
+	case 3:
+		return item.status
 	}
 	panic("unexpected col")
 }

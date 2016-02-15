@@ -17,6 +17,7 @@ type MyMainWindow struct {
 	tvmodel *RowModel
 	lb      *walk.ListBox
 	te      *walk.TextEdit
+	tv      *walk.TableView
 }
 
 type EnvItem struct {
@@ -62,7 +63,9 @@ func main() {
 			copy(cwd+`\extra\aviutl.ini`, item.workdir)
 
 			mw.model.items[item.index-1].status = 1
+			mw.tvmodel.items[item.index-1].status = 1
 			mw.lb.SetModel(mw.model)
+			mw.tvmodel.PublishRowChanged(item.index - 1)
 		}
 	}()
 
@@ -90,10 +93,11 @@ func main() {
 				}
 
 				tvitem := &Row{
-					index: mw.tvmodel.RowCount() + 1,
-					path:  f,
-					file:  file,
+					index:   mw.tvmodel.RowCount() + 1,
+					path:    f,
+					file:    file,
 					workdir: fmt.Sprintf("%s/%03d", tmp, mw.model.ItemCount()+1),
+					status:  0,
 				}
 
 				err = os.Mkdir(abs(item.workdir), 0666)
@@ -113,10 +117,12 @@ func main() {
 			VSplitter{
 				Children: []Widget{
 					TableView{
+						AssignTo: &mw.tv,
 						Columns: []TableViewColumn{
 							{Title: "index"},
 							{Title: "path"},
 							{Title: "workdir"},
+							{Title: "status"},
 						},
 						Model: mw.tvmodel,
 					},
