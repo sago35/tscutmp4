@@ -1,15 +1,15 @@
 package main
 
 import (
-	//"fmt"
 	"github.com/lxn/walk"
-	//. "github.com/lxn/walk/declarative"
-	//"sort"
+	"os"
 )
 
 type Row struct {
-	Index int
-	Path  string
+	index int
+	path  string
+	file  *os.File
+	workdir string
 }
 
 type RowModel struct {
@@ -26,9 +26,11 @@ func (m *RowModel) Value(row, col int) interface{} {
 
 	switch col {
 	case 0:
-		return item.Index
+		return item.index
 	case 1:
-		return item.Path
+		return item.path
+	case 2:
+		return item.workdir
 	}
 	panic("unexpected col")
 }

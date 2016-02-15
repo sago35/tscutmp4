@@ -90,8 +90,10 @@ func main() {
 				}
 
 				tvitem := &Row{
-					Index: mw.tvmodel.RowCount() + 1,
-					Path: f,
+					index: mw.tvmodel.RowCount() + 1,
+					path:  f,
+					file:  file,
+					workdir: fmt.Sprintf("%s/%03d", tmp, mw.model.ItemCount()+1),
 				}
 
 				err = os.Mkdir(abs(item.workdir), 0666)
@@ -112,8 +114,9 @@ func main() {
 				Children: []Widget{
 					TableView{
 						Columns: []TableViewColumn{
-							{Title: "#"},
-							{Title: "Path"},
+							{Title: "index"},
+							{Title: "path"},
+							{Title: "workdir"},
 						},
 						Model: mw.tvmodel,
 					},
