@@ -13,9 +13,10 @@ import (
 
 type MyMainWindow struct {
 	*walk.MainWindow
-	model *EnvModel
-	lb    *walk.ListBox
-	te    *walk.TextEdit
+	model   *EnvModel
+	tvmodel *RowModel
+	lb      *walk.ListBox
+	te      *walk.TextEdit
 }
 
 type EnvItem struct {
@@ -45,7 +46,7 @@ func main() {
 		panic(err)
 	}
 
-	mw := &MyMainWindow{model: NewEnvModel()}
+	mw := &MyMainWindow{model: NewEnvModel(), tvmodel: NewRowModel()}
 
 	ch := make(chan EnvItem, 100)
 
@@ -88,20 +89,34 @@ func main() {
 					status:  0,
 				}
 
+				tvitem := &Row{
+					Index: mw.tvmodel.RowCount() + 1,
+					Path: f,
+				}
+
 				err = os.Mkdir(abs(item.workdir), 0666)
 				if err != nil {
 					panic(err)
 				}
 				mw.model.items = append(mw.model.items, item)
+				mw.tvmodel.items = append(mw.tvmodel.items, tvitem)
 				ch <- item
 			}
 			mw.lb.SetModel(mw.model)
+			mw.tvmodel.PublishRowsReset()
 
 			fmt.Println("--")
 		},
 		Children: []Widget{
 			VSplitter{
 				Children: []Widget{
+					TableView{
+						Columns: []TableViewColumn{
+							{Title: "#"},
+							{Title: "Path"},
+						},
+						Model: mw.tvmodel,
+					},
 					ListBox{
 						AssignTo: &mw.lb,
 						Model:    mw.model,
