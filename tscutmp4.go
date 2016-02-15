@@ -84,7 +84,7 @@ func main() {
 				item := EnvItem{
 					name:    f,
 					file:    file,
-					workdir: fmt.Sprintf("%s/%03d", tmp, mw.model.ItemCount() + 1),
+					workdir: fmt.Sprintf("%s/%03d", tmp, mw.model.ItemCount()+1),
 					index:   mw.model.ItemCount() + 1,
 					status:  0,
 				}
@@ -142,14 +142,13 @@ func main() {
 				Children: []Widget{
 					HSpacer{},
 					PushButton{
-						Text:     "OK",
+						Text: "OK",
 					},
 					PushButton{
-						Text:      "Cancel",
+						Text: "Cancel",
 					},
 				},
 			},
-
 		},
 	}.Run()); err != nil {
 		log.Fatal(err)
