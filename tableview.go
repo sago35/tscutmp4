@@ -5,12 +5,19 @@ import (
 	"os"
 )
 
+type Status int
+
+const (
+	Loading Status = iota
+	Loaded
+)
+
 type Row struct {
 	index   int
 	path    string
 	file    *os.File
 	workdir string
-	status  int
+	status  Status
 }
 
 type RowModel struct {
