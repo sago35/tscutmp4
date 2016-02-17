@@ -22,7 +22,7 @@ type Row struct {
 
 type RowModel struct {
 	walk.TableModelBase
-	items []*Row
+	items []Row
 }
 
 func (m *RowModel) RowCount() int {

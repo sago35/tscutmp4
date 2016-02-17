@@ -49,12 +49,12 @@ func main() {
 
 	mw := &MyMainWindow{model: NewEnvModel(), tvmodel: NewRowModel()}
 
-	ch := make(chan EnvItem, 100)
+	ch := make(chan Row, 100)
 
 	go func() {
 		for item := range ch {
 
-			copy(item.name, fmt.Sprintf("%s/%s", item.workdir, `input.ts`))
+			copy(item.path, fmt.Sprintf("%s/%s", item.workdir, `input.ts`))
 			exec_cmd(item.workdir, []string{cwd + `\extra\dgmpgdec158\DGIndex.exe`, `-hide`, `-IF=[input.ts]`, `-OM=2`, `-OF=[input.ts]`, `-AT=[G:\encode\encode_18_masako\template.avs]`, `-EXIT`})
 			exec_cmd(item.workdir, []string{cwd + `\extra\BonTsDemux\BonTsDemuxC.exe`, `-i`, `input.ts`, `-o`, `input.ts.bontsdemux`, `-encode`, `Demux(wav)`, `-start`, `-quit`})
 			exec_cmd(item.workdir, []string{cwd + `\extra\neroAacEnc.exe`, `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.bontsdemux.wav`, `-of`, `input.ts.bontsdemux.aac`})
@@ -92,21 +92,21 @@ func main() {
 					status:  0,
 				}
 
-				tvitem := &Row{
+				tvitem := Row{
 					index:   mw.tvmodel.RowCount() + 1,
 					path:    f,
 					file:    file,
-					workdir: fmt.Sprintf("%s/%03d", tmp, mw.model.ItemCount()+1),
+					workdir: fmt.Sprintf("%s/%03d", tmp, mw.tvmodel.RowCount()+1),
 					status:  0,
 				}
 
-				err = os.Mkdir(abs(item.workdir), 0666)
+				err = os.Mkdir(abs(tvitem.workdir), 0666)
 				if err != nil {
 					panic(err)
 				}
 				mw.model.items = append(mw.model.items, item)
 				mw.tvmodel.items = append(mw.tvmodel.items, tvitem)
-				ch <- item
+				ch <- tvitem
 			}
 			mw.lb.SetModel(mw.model)
 			mw.tvmodel.PublishRowsReset()
