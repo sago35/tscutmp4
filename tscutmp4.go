@@ -72,8 +72,8 @@ func main() {
 	if _, err := (MainWindow{
 		AssignTo: &mw.MainWindow,
 		Title:    fmt.Sprintf("tscutmp4"),
-		MinSize:  Size{640, 240},
-		Size:     Size{640, 240},
+		MinSize:  Size{960, 480},
+		Size:     Size{960, 480},
 		Layout:   VBox{MarginsZero: true},
 		OnDropFiles: func(files []string) {
 			fmt.Println("-- dropped --")
