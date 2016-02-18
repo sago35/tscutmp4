@@ -124,7 +124,8 @@ func main() {
 							{Title: "workdir"},
 							{Title: "status"},
 						},
-						Model: mw.tvmodel,
+						Model:           mw.tvmodel,
+						OnItemActivated: mw.tv_ItemActivated,
 					},
 					ListBox{
 						AssignTo: &mw.lb,
@@ -227,4 +228,10 @@ func abs(path string) string {
 		panic(err)
 	}
 	return a
+}
+
+func (mw *MyMainWindow) tv_ItemActivated() {
+	i := mw.tv.CurrentIndex()
+	msg := mw.tvmodel.items[i].path
+	walk.MsgBox(mw, "title", msg, walk.MsgBoxIconInformation)
 }
