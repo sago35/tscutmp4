@@ -231,7 +231,12 @@ func abs(path string) string {
 }
 
 func (mw *MyMainWindow) tv_ItemActivated() {
-	i := mw.tv.CurrentIndex()
-	msg := mw.tvmodel.items[i].path
-	walk.MsgBox(mw, "title", msg, walk.MsgBoxIconInformation)
+	cwd, err := filepath.Abs(".")
+	if err != nil {
+		panic(err)
+	}
+
+	item := mw.tvmodel.items[mw.tv.CurrentIndex()]
+	fmt.Println(item.path)
+	go exec_cmd(item.workdir, []string{cwd + `\extra\aviutl99i8\aviutl.exe`, `trim.avs`, `-a`, `input.ts.all.wav`})
 }
