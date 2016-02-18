@@ -13,24 +13,9 @@ import (
 
 type MyMainWindow struct {
 	*walk.MainWindow
-	model   *EnvModel
 	tvmodel *RowModel
-	lb      *walk.ListBox
 	te      *walk.TextEdit
 	tv      *walk.TableView
-}
-
-type EnvItem struct {
-	name    string
-	file    *os.File
-	workdir string
-	index   int
-	status  int
-}
-
-type EnvModel struct {
-	walk.ListModelBase
-	items []EnvItem
 }
 
 const tmp string = `tmp`
@@ -47,7 +32,7 @@ func main() {
 		panic(err)
 	}
 
-	mw := &MyMainWindow{model: NewEnvModel(), tvmodel: NewRowModel()}
+	mw := &MyMainWindow{tvmodel: NewRowModel()}
 
 	ch := make(chan Row, 100)
 
@@ -62,9 +47,7 @@ func main() {
 			copy(cwd+`\extra\trim.avs`, item.workdir)
 			copy(cwd+`\extra\aviutl.ini`, item.workdir)
 
-			mw.model.items[item.index-1].status = 1
 			mw.tvmodel.items[item.index-1].status = 1
-			mw.lb.SetModel(mw.model)
 			mw.tvmodel.PublishRowChanged(item.index - 1)
 		}
 	}()
@@ -84,14 +67,6 @@ func main() {
 					panic(err)
 				}
 
-				item := EnvItem{
-					name:    f,
-					file:    file,
-					workdir: fmt.Sprintf("%s/%03d", tmp, mw.model.ItemCount()+1),
-					index:   mw.model.ItemCount() + 1,
-					status:  0,
-				}
-
 				tvitem := Row{
 					index:   mw.tvmodel.RowCount() + 1,
 					path:    f,
@@ -104,11 +79,9 @@ func main() {
 				if err != nil {
 					panic(err)
 				}
-				mw.model.items = append(mw.model.items, item)
 				mw.tvmodel.items = append(mw.tvmodel.items, tvitem)
 				ch <- tvitem
 			}
-			mw.lb.SetModel(mw.model)
 			mw.tvmodel.PublishRowsReset()
 
 			fmt.Println("--")
@@ -126,20 +99,6 @@ func main() {
 						},
 						Model:           mw.tvmodel,
 						OnItemActivated: mw.tv_ItemActivated,
-					},
-					ListBox{
-						AssignTo: &mw.lb,
-						Model:    mw.model,
-						OnItemActivated: func() {
-							item := mw.model.items[mw.lb.CurrentIndex()]
-							go exec_cmd(item.workdir, []string{cwd + `\extra\aviutl99i8\aviutl.exe`, `trim.avs`, `-a`, `input.ts.all.wav`})
-						},
-						OnCurrentIndexChanged: func() {
-							i := mw.lb.CurrentIndex()
-							item := &mw.model.items[i]
-
-							mw.te.SetText(item.file.Name())
-						},
 					},
 					TextEdit{
 						AssignTo: &mw.te,
@@ -163,19 +122,6 @@ func main() {
 	}.Run()); err != nil {
 		log.Fatal(err)
 	}
-}
-
-func NewEnvModel() *EnvModel {
-	m := &EnvModel{items: make([]EnvItem, 0)}
-	return m
-}
-
-func (m *EnvModel) ItemCount() int {
-	return len(m.items)
-}
-
-func (m *EnvModel) Value(index int) interface{} {
-	return fmt.Sprintf("%d : %03d : %s", m.items[index].status, m.items[index].index, m.items[index].file.Name())
 }
 
 func copy(src, dst string) {
