@@ -90,7 +90,8 @@ func main() {
 			VSplitter{
 				Children: []Widget{
 					TableView{
-						AssignTo: &mw.tv,
+						AssignTo:   &mw.tv,
+						CheckBoxes: true,
 						Columns: []TableViewColumn{
 							{Title: "index"},
 							{Title: "path"},
