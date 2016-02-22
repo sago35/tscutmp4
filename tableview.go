@@ -18,6 +18,7 @@ type Row struct {
 	file    *os.File
 	workdir string
 	status  Status
+	checked bool
 }
 
 type RowModel struct {
@@ -43,6 +44,15 @@ func (m *RowModel) Value(row, col int) interface{} {
 		return item.status
 	}
 	panic("unexpected col")
+}
+
+func (m *RowModel) Checked(row int) bool {
+	return m.items[row].checked
+}
+
+func (m *RowModel) SetChecked(row int, checked bool) error {
+	m.items[row].checked = checked
+	return nil
 }
 
 func NewRowModel() *RowModel {
