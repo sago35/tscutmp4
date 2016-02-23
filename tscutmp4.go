@@ -112,7 +112,22 @@ func main() {
 				Children: []Widget{
 					HSpacer{},
 					PushButton{
-						Text: "OK",
+						Text: "EncodeChecked",
+						OnClicked: func() {
+							go func() {
+								for _, item := range mw.tvmodel.items {
+									if item.checked {
+										fmt.Printf("encode start: %v\n", item)
+										exec_cmd(item.workdir, []string{cwd + `\extra\avs2wav.exe`, `input.ts.avs`, `input.ts.wav`})
+										exec_cmd(item.workdir, []string{cwd + `\extra\neroAacEnc.exe`, `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.wav`, `-of`, `input.ts.aac`})
+										exec_cmd(item.workdir, []string{cwd + `\extra\x264.32bit.0.130.22730.130.2273.exe`, `--threads`, `8`, `--scenecut`, `60`, `--crf`, `20`, `--level`, `3.1`, `--output`, `input.ts.mp4`, `input.ts.avs`})
+										exec_cmd(item.workdir, []string{cwd + `\extra\mp4box.exe`, `-add`, `input.ts.mp4#video`, `-add`, `input.ts.aac#audio`, `-new`, `output.mp4`})
+										fmt.Printf("encode end  : %v\n", item)
+									}
+								}
+								fmt.Println()
+							}()
+						},
 					},
 					PushButton{
 						Text: "Cancel",
