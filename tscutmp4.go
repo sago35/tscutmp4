@@ -98,7 +98,10 @@ func main() {
 							{Title: "workdir"},
 							{Title: "status"},
 						},
-						Model:           mw.tvmodel,
+						Model: mw.tvmodel,
+						OnCurrentIndexChanged: func() {
+							fmt.Printf("OnCurrentIndexChange\n")
+						},
 						OnItemActivated: mw.tv_ItemActivated,
 					},
 					TextEdit{
