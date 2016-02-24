@@ -100,7 +100,10 @@ func main() {
 						},
 						Model: mw.tvmodel,
 						OnCurrentIndexChanged: func() {
-							fmt.Printf("OnCurrentIndexChange\n")
+							i := mw.tv.CurrentIndex()
+							if 0 <= i {
+								fmt.Printf("OnCurrentIndexChange: %v\n", mw.tvmodel.items[i].path)
+							}
 						},
 						OnItemActivated: mw.tv_ItemActivated,
 					},
