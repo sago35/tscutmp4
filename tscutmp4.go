@@ -40,12 +40,12 @@ func main() {
 		for item := range ch {
 
 			copy(item.path, fmt.Sprintf("%s/%s", item.workdir, `input.ts`))
-			exec_cmd(item.workdir, []string{cwd + `\extra\dgmpgdec158\DGIndex.exe`, `-hide`, `-IF=[input.ts]`, `-OM=2`, `-OF=[input.ts]`, `-AT=[G:\encode\encode_18_masako\template.avs]`, `-EXIT`})
-			exec_cmd(item.workdir, []string{cwd + `\extra\BonTsDemux\BonTsDemuxC.exe`, `-i`, `input.ts`, `-o`, `input.ts.bontsdemux`, `-encode`, `Demux(wav)`, `-start`, `-quit`})
-			exec_cmd(item.workdir, []string{cwd + `\extra\neroAacEnc.exe`, `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.bontsdemux.wav`, `-of`, `input.ts.bontsdemux.aac`})
-			exec_cmd(item.workdir, []string{cwd + `\extra\avs2wav.exe`, `input.ts.avs`, `input.ts.all.wav`})
-			copy(cwd+`\extra\trim.avs`, item.workdir)
-			copy(cwd+`\extra\aviutl.ini`, item.workdir)
+			exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\dgmpgdec158\DGIndex.exe`), `-hide`, `-IF=[input.ts]`, `-OM=2`, `-OF=[input.ts]`, `-AT=[G:\encode\encode_18_masako\template.avs]`, `-EXIT`})
+			exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\BonTsDemux\BonTsDemuxC.exe`), `-i`, `input.ts`, `-o`, `input.ts.bontsdemux`, `-encode`, `Demux(wav)`, `-start`, `-quit`})
+			exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\neroAacEnc.exe`), `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.bontsdemux.wav`, `-of`, `input.ts.bontsdemux.aac`})
+			exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\avs2wav.exe`), `input.ts.avs`, `input.ts.all.wav`})
+			copy(filepath.Join(cwd, `extra\trim.avs`), item.workdir)
+			copy(filepath.Join(cwd, `extra\aviutl.ini`), item.workdir)
 
 			mw.tvmodel.items[item.index-1].status = Loaded
 			mw.tvmodel.PublishRowChanged(item.index - 1)
@@ -126,10 +126,10 @@ func main() {
 										fmt.Printf("encode start: %v\n", item)
 										mw.tvmodel.items[item.index-1].status = Encoding
 										mw.tvmodel.PublishRowChanged(item.index - 1)
-										exec_cmd(item.workdir, []string{cwd + `\extra\avs2wav.exe`, `input.ts.avs`, `input.ts.wav`})
-										exec_cmd(item.workdir, []string{cwd + `\extra\neroAacEnc.exe`, `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.wav`, `-of`, `input.ts.aac`})
-										exec_cmd(item.workdir, []string{cwd + `\extra\x264.32bit.0.130.22730.130.2273.exe`, `--threads`, `8`, `--scenecut`, `60`, `--crf`, `20`, `--level`, `3.1`, `--output`, `input.ts.mp4`, `input.ts.avs`})
-										exec_cmd(item.workdir, []string{cwd + `\extra\mp4box.exe`, `-add`, `input.ts.mp4#video`, `-add`, `input.ts.aac#audio`, `-new`, `output.mp4`})
+										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\avs2wav.exe`), `input.ts.avs`, `input.ts.wav`})
+										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\neroAacEnc.exe`), `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.wav`, `-of`, `input.ts.aac`})
+										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\x264.32bit.0.130.22730.130.2273.exe`), `--threads`, `8`, `--scenecut`, `60`, `--crf`, `20`, `--level`, `3.1`, `--output`, `input.ts.mp4`, `input.ts.avs`})
+										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\mp4box.exe`), `-add`, `input.ts.mp4#video`, `-add`, `input.ts.aac#audio`, `-new`, `output.mp4`})
 										fmt.Printf("encode end  : %v\n", item)
 										mw.tvmodel.items[item.index-1].status = Encoded
 										mw.tvmodel.PublishRowChanged(item.index - 1)
@@ -210,5 +210,5 @@ func (mw *MyMainWindow) tv_ItemActivated() {
 
 	item := mw.tvmodel.items[mw.tv.CurrentIndex()]
 	fmt.Println(item.path)
-	go exec_cmd(item.workdir, []string{cwd + `\extra\aviutl99i8\aviutl.exe`, `trim.avs`, `-a`, `input.ts.all.wav`})
+	go exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\aviutl99i8\aviutl.exe`), `trim.avs`, `-a`, `input.ts.all.wav`})
 }
