@@ -4,9 +4,9 @@ package main
 
 import "fmt"
 
-const _Status_name = "LoadingLoaded"
+const _Status_name = "LoadingLoadedEncodingEncoded"
 
-var _Status_index = [...]uint8{0, 7, 13}
+var _Status_index = [...]uint8{0, 7, 13, 21, 28}
 
 func (i Status) String() string {
 	if i < 0 || i >= Status(len(_Status_index)-1) {

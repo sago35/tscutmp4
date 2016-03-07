@@ -10,6 +10,8 @@ type Status int
 const (
 	Loading Status = iota
 	Loaded
+	Encoding
+	Encoded
 )
 
 type Row struct {
