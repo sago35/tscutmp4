@@ -47,7 +47,7 @@ func main() {
 			copy(cwd+`\extra\trim.avs`, item.workdir)
 			copy(cwd+`\extra\aviutl.ini`, item.workdir)
 
-			mw.tvmodel.items[item.index-1].status = 1
+			mw.tvmodel.items[item.index-1].status = Loaded
 			mw.tvmodel.PublishRowChanged(item.index - 1)
 		}
 	}()
@@ -72,7 +72,7 @@ func main() {
 					path:    f,
 					file:    file,
 					workdir: fmt.Sprintf("%s/%03d", tmp, mw.tvmodel.RowCount()+1),
-					status:  0,
+					status:  Loading,
 				}
 
 				err = os.Mkdir(abs(tvitem.workdir), 0666)
