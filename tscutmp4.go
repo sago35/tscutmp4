@@ -130,7 +130,7 @@ func main() {
 										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\neroAacEnc.exe`), `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.wav`, `-of`, `input.ts.aac`})
 										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\x264.32bit.0.130.22730.130.2273.exe`), `--threads`, `8`, `--scenecut`, `60`, `--crf`, `20`, `--level`, `3.1`, `--output`, `input.ts.mp4`, `input.ts.avs`})
 										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\mp4box.exe`), `-add`, `input.ts.mp4#video`, `-add`, `input.ts.aac#audio`, `-new`, `output.mp4`})
-										os.Rename(filepath.Join(item.workdir, "output.mp4"), filepath.Join(item.workdir, filepath.Base(item.path)+`.mp4`))
+										os.Rename(filepath.Join(item.workdir, "output.mp4"), item.path+`.mp4`)
 										fmt.Printf("encode end  : %v\n", item)
 										mw.tvmodel.items[item.index-1].status = Encoded
 										mw.tvmodel.PublishRowChanged(item.index - 1)
