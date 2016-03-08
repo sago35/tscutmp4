@@ -20,6 +20,7 @@ type Row struct {
 	file    *os.File
 	workdir string
 	status  Status
+	trim    string
 	checked bool
 }
 
@@ -44,6 +45,8 @@ func (m *RowModel) Value(row, col int) interface{} {
 		return item.workdir
 	case 3:
 		return item.status
+	case 4:
+		return item.trim
 	}
 	panic("unexpected col")
 }
