@@ -40,7 +40,7 @@ func main() {
 		for item := range ch {
 
 			copy(item.path, fmt.Sprintf("%s/%s", item.workdir, `input.ts`))
-			exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\dgmpgdec158\DGIndex.exe`), `-hide`, `-IF=[input.ts]`, `-OM=2`, `-OF=[input.ts]`, `-AT=[G:\encode\encode_18_masako\template.avs]`, `-EXIT`})
+			exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\dgmpgdec158\DGIndex.exe`), `-hide`, `-IF=[input.ts]`, `-OM=2`, `-OF=[input.ts]`, `-AT=[` + filepath.Join(cwd, `extra\template.avs`) + `]`, `-EXIT`})
 			exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\BonTsDemux\BonTsDemuxC.exe`), `-i`, `input.ts`, `-o`, `input.ts.bontsdemux`, `-encode`, `Demux(wav)`, `-start`, `-quit`})
 			exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\neroAacEnc.exe`), `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.bontsdemux.wav`, `-of`, `input.ts.bontsdemux.aac`})
 			exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\avs2wav.exe`), `input.ts.avs`, `input.ts.all.wav`})
