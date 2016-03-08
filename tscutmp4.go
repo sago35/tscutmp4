@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
@@ -9,6 +10,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 )
 
 type MyMainWindow struct {
@@ -103,13 +105,20 @@ func main() {
 							i := mw.tv.CurrentIndex()
 							if 0 <= i {
 								fmt.Printf("OnCurrentIndexChange: %v\n", mw.tvmodel.items[i].path)
+								mw.te.SetText(mw.tvmodel.items[i].trim)
 							}
 						},
 						OnItemActivated: mw.tv_ItemActivated,
 					},
 					TextEdit{
 						AssignTo: &mw.te,
-						ReadOnly: true,
+						ReadOnly: false,
+						OnKeyUp: func(key walk.Key) {
+							i := mw.tv.CurrentIndex()
+							if 0 <= i {
+								mw.tvmodel.items[i].trim = mw.te.Text()
+							}
+						},
 					},
 				},
 			},
@@ -126,9 +135,14 @@ func main() {
 										fmt.Printf("encode start: %v\n", item)
 										mw.tvmodel.items[item.index-1].status = Encoding
 										mw.tvmodel.PublishRowChanged(item.index - 1)
-										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\avs2wav.exe`), `input.ts.avs`, `input.ts.wav`})
+										trim := mw.tvmodel.items[item.index-1].trim
+										trim = regexp.MustCompile(`[\r\n]+`).ReplaceAllString(trim, `++`)
+										trim = regexp.MustCompile(`^\+\+`).ReplaceAllString(trim, ``)
+										trim = regexp.MustCompile(`\+\+$`).ReplaceAllString(trim, ``)
+										update_avs_file(filepath.Join(item.workdir, `input.ts.avs`), filepath.Join(item.workdir, `input.ts.after.avs`), trim)
+										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\avs2wav.exe`), `input.ts.after.avs`, `input.ts.wav`})
 										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\neroAacEnc.exe`), `-br`, `128000`, `-ignorelength`, `-if`, `input.ts.wav`, `-of`, `input.ts.aac`})
-										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\x264.32bit.0.130.22730.130.2273.exe`), `--threads`, `8`, `--scenecut`, `60`, `--crf`, `20`, `--level`, `3.1`, `--output`, `input.ts.mp4`, `input.ts.avs`})
+										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\x264.32bit.0.130.22730.130.2273.exe`), `--threads`, `8`, `--scenecut`, `60`, `--crf`, `20`, `--level`, `3.1`, `--output`, `input.ts.mp4`, `input.ts.after.avs`})
 										exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\mp4box.exe`), `-add`, `input.ts.mp4#video`, `-add`, `input.ts.aac#audio`, `-new`, `output.mp4`})
 										os.Rename(filepath.Join(item.workdir, "output.mp4"), item.path+`.mp4`)
 										fmt.Printf("encode end  : %v\n", item)
@@ -212,4 +226,42 @@ func (mw *MyMainWindow) tv_ItemActivated() {
 	item := mw.tvmodel.items[mw.tv.CurrentIndex()]
 	fmt.Println(item.path)
 	go exec_cmd(item.workdir, []string{filepath.Join(cwd, `extra\aviutl99i8\aviutl.exe`), `trim.avs`, `-a`, `input.ts.all.wav`})
+}
+
+func update_avs_file(from, to, trim string) error {
+	r, err := os.Open(from)
+	if err != nil {
+		return err
+	}
+	defer r.Close()
+
+	w, err := os.Create(to)
+	if err != nil {
+		return err
+	}
+	defer w.Close()
+
+	return update_avs(r, w, trim)
+}
+
+func update_avs(r io.Reader, w io.Writer, trim string) error {
+
+	scanner := bufio.NewScanner(r)
+	state := `NOT_SKIP`
+	for scanner.Scan() {
+		line := scanner.Text()
+		if line == `# Trim() start` {
+			state = `SKIP`
+			fmt.Fprintf(w, "%s\r\n", scanner.Text())
+		} else if line == `# Trim() end` {
+			state = `NOT_SKIP`
+			fmt.Fprintf(w, "%s\r\n", trim)
+			fmt.Fprintf(w, "%s\r\n", scanner.Text())
+		} else if state == `SKIP` {
+		} else {
+			fmt.Fprintf(w, "%s\r\n", scanner.Text())
+		}
+	}
+
+	return nil
 }
