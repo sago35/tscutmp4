@@ -80,6 +80,7 @@ func main() {
 
 				err = os.Mkdir(abs(tvitem.workdir), 0666)
 				if err != nil {
+					walk.MsgBox(mw.MainWindow, "Error", "フォルダを作成できません\r"+err.Error(), walk.MsgBoxIconError)
 					panic(err)
 				}
 				mw.tvmodel.items = append(mw.tvmodel.items, tvitem)
