@@ -24,9 +24,17 @@ type MyMainWindow struct {
 const tmp string = `tmp`
 
 func main() {
-	if _, err := os.Stat(tmp); err != nil {
+	if i, err := os.Stat(tmp); err != nil {
 		if os.IsNotExist(err) {
 			os.Mkdir(tmp, 0666)
+		}
+	} else if i.IsDir() {
+		if dirs, err := filepath.Glob(filepath.Join(tmp, "*")); err == nil {
+			for _, dir := range dirs {
+				if err := os.RemoveAll(dir); err != nil {
+					panic(err)
+				}
+			}
 		}
 	}
 
